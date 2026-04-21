@@ -1,31 +1,29 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { ThemeProvider } from "next-themes"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { AppSidebar } from "@/components/layouts/app-sidebar"
-import { AppHeader } from "@/components/layouts/app-header"
-import "./globals.css"
+import type { Metadata } from "next";
+import { Prompt } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppSidebar } from "@/components/layouts/app-sidebar";
+import { AppHeader } from "@/components/layouts/app-header";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-})
+const prompt = Prompt({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "thai"],
+  variable: "--font-prompt",
+});
 
 export const metadata: Metadata = {
   title: "DocuRender",
   description: "สร้างเอกสาร PDF จากฟอร์มออนไลน์",
-}
+};
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="th" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <body>
+    <html lang="th" suppressHydrationWarning className={prompt.variable}>
+      <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
             <SidebarProvider>
@@ -41,5 +39,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
