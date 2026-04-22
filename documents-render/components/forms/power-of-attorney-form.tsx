@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { ThaiDatePicker, toThaiDateParts } from "@/components/ui/thai-date-picker"
 
 const personSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อ"),
@@ -29,9 +30,7 @@ const personSchema = z.object({
 
 const schema = z.object({
   writtenAt: z.string().min(1, "กรุณากรอกสถานที่"),
-  day: z.string().min(1, "กรุณากรอกวันที่"),
-  month: z.string().min(1, "กรุณาเลือกเดือน"),
-  year: z.string().min(1, "กรุณากรอกปี"),
+  date: z.date({ error: "กรุณาเลือกวันที่" }),
   grantor: personSchema.extend({
     currentAddress: z.string().min(1, "กรุณากรอกที่อยู่ปัจจุบัน"),
   }),
@@ -43,11 +42,6 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
-
-const MONTHS = [
-  "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
-  "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม",
-]
 
 function PersonFields({
   prefix,
@@ -207,9 +201,7 @@ export default function PowerOfAttorneyForm() {
     resolver: zodResolver(schema),
     defaultValues: {
       writtenAt: "",
-      day: "",
-      month: "",
-      year: "",
+      date: undefined as unknown as Date,
       grantor: { name: "", age: undefined as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "", currentAddress: "" },
       attorney: { name: "", age: undefined as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "" },
       powers1: "",
@@ -223,7 +215,8 @@ export default function PowerOfAttorneyForm() {
     setLoading(true)
     setError(null)
     try {
-      await generatePdf("power-of-attorney", values)
+      const { day, month, year } = toThaiDateParts(values.date)
+      await generatePdf("power-of-attorney", { ...values, day, month, year })
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -237,11 +230,11 @@ export default function PowerOfAttorneyForm() {
         {/* ข้อมูลเอกสาร */}
         <section className="rounded-lg border bg-white p-4 shadow-xs">
           <h2 className="mb-4 font-medium text-zinc-800">ข้อมูลเอกสาร</h2>
-          <div className="grid gap-3 sm:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2">
             <FormField
               name="writtenAt"
               render={({ field }) => (
-                <FormItem className="sm:col-span-4">
+                <FormItem>
                   <FormLabel>เขียนที่</FormLabel>
                   <FormControl><Input placeholder="เช่น กรุงเทพมหานคร" {...field} /></FormControl>
                   <FormMessage />
@@ -249,39 +242,13 @@ export default function PowerOfAttorneyForm() {
               )}
             />
             <FormField
-              name="day"
+              name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>วันที่</FormLabel>
-                  <FormControl><Input placeholder="1–31" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="month"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-2">
-                  <FormLabel>เดือน</FormLabel>
+                  <FormLabel>วันที่ทำเอกสาร</FormLabel>
                   <FormControl>
-                    <select
-                      className="flex h-8 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                      {...field}
-                    >
-                      <option value="">เลือกเดือน</option>
-                      {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                    <ThaiDatePicker value={field.value} onChange={field.onChange} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="year"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ปี (พ.ศ.)</FormLabel>
-                  <FormControl><Input placeholder="2567" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -1,3 +1,9 @@
+export interface Template {
+  id: string
+  titleTh: string
+  descriptionTh: string
+}
+
 export interface SignaturePosition {
   id: string
   label: string
@@ -13,6 +19,28 @@ export interface SignaturePositionsResult {
   pageWidth: number
   pageHeight: number
   signatures: SignaturePosition[]
+}
+
+export async function getTemplates(): Promise<Template[]> {
+  const res = await fetch("/api/v1/pdf/templates")
+  if (!res.ok) return []
+  const json = await res.json()
+  return json.data as Template[]
+}
+
+export async function getTemplatesServer(
+  backendUrl = "http://localhost:5000"
+): Promise<Template[]> {
+  try {
+    const res = await fetch(`${backendUrl}/api/v1/pdf/templates`, {
+      cache: "no-store",
+    })
+    if (!res.ok) return []
+    const json = await res.json()
+    return json.data as Template[]
+  } catch {
+    return []
+  }
 }
 
 export async function getSignaturePositions(

@@ -8,8 +8,13 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { AppSidebarNav } from "./app-sidebar-nav"
+import { getTemplatesServer } from "@/lib/api"
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const templates = await getTemplatesServer(
+    process.env.BACKEND_URL ?? "http://localhost:5000"
+  )
+
   return (
     <Sidebar variant="inset" className="border-r border-sidebar-border">
       <SidebarHeader>
@@ -27,7 +32,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>เมนู</SidebarGroupLabel>
           <SidebarGroupContent>
-            <AppSidebarNav />
+            <AppSidebarNav formTemplates={templates} />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

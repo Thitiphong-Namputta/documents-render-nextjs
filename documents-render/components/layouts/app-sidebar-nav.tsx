@@ -2,7 +2,20 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { FileTextIcon, FilesIcon, HomeIcon, ScrollTextIcon, ChevronRightIcon } from "lucide-react"
+import {
+  FileTextIcon,
+  FilesIcon,
+  HomeIcon,
+  ScrollTextIcon,
+  ChevronRightIcon,
+  FileSignatureIcon,
+  BookOpenIcon,
+  AwardIcon,
+  ClipboardListIcon,
+  BriefcaseIcon,
+  BarChart3Icon,
+  FileBadgeIcon,
+} from "lucide-react"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -12,39 +25,65 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import type { Template } from "@/lib/api"
 
-const navItems = [
-  {
-    title: "หน้าแรก",
-    href: "/",
-    icon: HomeIcon,
-    items: [],
-  },
-  {
-    title: "รายการ PDF",
-    href: "/pdfs",
-    icon: FilesIcon,
-    items: [],
-  },
-  {
-    title: "ฟอร์มเอกสาร",
-    href: "/forms",
-    icon: FileTextIcon,
-    items: [
-      { title: "หนังสือมอบอำนาจ", href: "/forms/power-of-attorney", icon: ScrollTextIcon },
-      { title: "ใบแจ้งหนี้", href: "/forms/invoice", icon: FileTextIcon },
-    ],
-  },
-]
+const TEMPLATE_ICONS: Record<string, React.ElementType> = {
+  "invoice": FileTextIcon,
+  "power-of-attorney": ScrollTextIcon,
+  "power-of-attorney-multi": FileSignatureIcon,
+  "contract": BookOpenIcon,
+  "certificate": AwardIcon,
+  "petition": ClipboardListIcon,
+  "certification": FileBadgeIcon,
+  "job-application": BriefcaseIcon,
+  "report": BarChart3Icon,
+}
 
-export function AppSidebarNav() {
+function getTemplateIcon(id: string): React.ElementType {
+  return TEMPLATE_ICONS[id] ?? FileTextIcon
+}
+
+interface AppSidebarNavProps {
+  formTemplates?: Template[]
+}
+
+export function AppSidebarNav({ formTemplates = [] }: AppSidebarNavProps) {
   const pathname = usePathname()
+
+  const formSubItems = formTemplates.map((t) => ({
+    title: t.titleTh,
+    href: `/forms/${t.id}`,
+    icon: getTemplateIcon(t.id),
+  }))
+
+  const navItems = [
+    {
+      title: "หน้าแรก",
+      href: "/",
+      icon: HomeIcon,
+      items: [],
+    },
+    {
+      title: "รายการ PDF",
+      href: "/pdfs",
+      icon: FilesIcon,
+      items: [],
+    },
+    {
+      title: "ฟอร์มเอกสาร",
+      href: "/forms",
+      icon: FileTextIcon,
+      items: formSubItems,
+    },
+  ]
 
   return (
     <SidebarMenu>
       {navItems.map((item) => {
         const isActive = pathname === item.href
-        const isGroupActive = item.items.some((sub) => pathname === sub.href) || pathname === item.href
+        const isGroupActive =
+          item.items.some((sub) => pathname === sub.href) ||
+          pathname === item.href
 
         if (item.items.length === 0) {
           return (
@@ -60,7 +99,12 @@ export function AppSidebarNav() {
         }
 
         return (
-          <Collapsible key={item.href} asChild defaultOpen={isGroupActive} className="group/collapsible">
+          <Collapsible
+            key={item.href}
+            asChild
+            defaultOpen={isGroupActive}
+            className="group/collapsible"
+          >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton isActive={isGroupActive}>
@@ -73,7 +117,10 @@ export function AppSidebarNav() {
                 <SidebarMenuSub>
                   {item.items.map((sub) => (
                     <SidebarMenuSubItem key={sub.href}>
-                      <SidebarMenuSubButton asChild isActive={pathname === sub.href}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={pathname === sub.href}
+                      >
                         <Link href={sub.href}>
                           <sub.icon />
                           <span>{sub.title}</span>
