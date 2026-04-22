@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CalendarIcon } from "lucide-react"
 import { getDateLib, th as thLocale } from "react-day-picker/buddhist"
+import type { Numerals } from "react-day-picker"
 
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -54,6 +55,7 @@ interface ThaiDatePickerProps {
   onChange: (date: Date | undefined) => void
   placeholder?: string
   className?: string
+  numerals?: Numerals
 }
 
 export function ThaiDatePicker({
@@ -61,6 +63,7 @@ export function ThaiDatePicker({
   onChange,
   placeholder = "เลือกวันที่",
   className,
+  numerals = "thai",
 }: ThaiDatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -88,7 +91,7 @@ export function ThaiDatePicker({
             setOpen(false)
           }}
           locale={thLocale}
-          numerals="thai"
+          numerals={numerals}
           captionLayout="dropdown"
           dateLib={buddhistDateLib}
           timeZone={BANGKOK_TZ}

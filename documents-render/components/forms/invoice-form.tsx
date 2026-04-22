@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { ThaiDatePicker, formatThaiDate } from "@/components/ui/thai-date-picker"
 
 const itemSchema = z.object({
   name: z.string().min(1, "กรุณากรอกรายการ"),
@@ -24,8 +25,8 @@ const schema = z.object({
   companyTel: z.string().min(1, "กรุณากรอกเบอร์โทร"),
   companyEmail: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
   invoiceNo: z.string().min(1, "กรุณากรอกเลขที่ใบแจ้งหนี้"),
-  invoiceDate: z.string().min(1, "กรุณากรอกวันที่"),
-  dueDate: z.string().min(1, "กรุณากรอกวันครบกำหนด"),
+  invoiceDate: z.date({ error: "กรุณาเลือกวันที่ออก" }),
+  dueDate: z.date({ error: "กรุณาเลือกวันครบกำหนด" }),
   clientName: z.string().min(1, "กรุณากรอกชื่อลูกค้า"),
   clientAddress: z.string().min(1, "กรุณากรอกที่อยู่ลูกค้า"),
   items: z.array(itemSchema).min(1, "กรุณาเพิ่มรายการอย่างน้อย 1 รายการ"),
@@ -55,8 +56,8 @@ export default function InvoiceForm() {
       companyTel: "",
       companyEmail: "",
       invoiceNo: "",
-      invoiceDate: "",
-      dueDate: "",
+      invoiceDate: undefined as unknown as Date,
+      dueDate: undefined as unknown as Date,
       clientName: "",
       clientAddress: "",
       items: [{ name: "", qty: 1, price: 0 }],
@@ -81,6 +82,8 @@ export default function InvoiceForm() {
     try {
       await generatePdf("invoice", {
         ...values,
+        invoiceDate: formatThaiDate(values.invoiceDate),
+        dueDate: formatThaiDate(values.dueDate),
         subtotal,
         taxAmount,
         total,
@@ -161,7 +164,9 @@ export default function InvoiceForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>วันที่ออก</FormLabel>
-                  <FormControl><Input placeholder="21 เมษายน 2567" {...field} /></FormControl>
+                  <FormControl>
+                    <ThaiDatePicker value={field.value} onChange={field.onChange} numerals="latn" />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -171,7 +176,9 @@ export default function InvoiceForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>วันครบกำหนดชำระ</FormLabel>
-                  <FormControl><Input placeholder="21 พฤษภาคม 2567" {...field} /></FormControl>
+                  <FormControl>
+                    <ThaiDatePicker value={field.value} onChange={field.onChange} numerals="latn" />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
