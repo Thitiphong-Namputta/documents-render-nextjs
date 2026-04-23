@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react"
 
 import { generatePdf } from "@/lib/api"
+import PdfViewerWrapper from "@/components/pdf/viewer-wrapper"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -46,6 +47,13 @@ function calcTotals(items: { qty: number; price: number }[], taxRate: number) {
 export default function InvoiceForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl)
+    }
+  }, [pdfUrl])
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -76,7 +84,7 @@ export default function InvoiceForm() {
     setError(null)
     const { subtotal, taxAmount, total } = calcTotals(values.items, values.tax)
     try {
-      await generatePdf("invoice", {
+      const url = await generatePdf("invoice", {
         ...values,
         invoiceDate: formatThaiDate(values.invoiceDate),
         dueDate: formatThaiDate(values.dueDate),
@@ -84,6 +92,7 @@ export default function InvoiceForm() {
         taxAmount,
         total,
       })
+      setPdfUrl(url)
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -92,6 +101,7 @@ export default function InvoiceForm() {
   }
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* ข้อมูลบริษัท */}
@@ -333,5 +343,15 @@ export default function InvoiceForm() {
         </Button>
       </form>
     </Form>
+
+    {pdfUrl && (
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+          ผลลัพธ์ PDF
+        </h2>
+        <PdfViewerWrapper url={pdfUrl} />
+      </div>
+    )}
+  </>
   )
 }

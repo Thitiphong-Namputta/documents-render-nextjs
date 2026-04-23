@@ -62,7 +62,7 @@ export async function getSignaturePositions(
   return json.data as SignaturePositionsResult
 }
 
-export async function generatePdf(type: string, data: unknown): Promise<void> {
+export async function generatePdf(type: string, data: unknown): Promise<string> {
   const res = await fetch("/api/v1/pdf/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -75,7 +75,5 @@ export async function generatePdf(type: string, data: unknown): Promise<void> {
   }
 
   const blob = await res.blob()
-  const url = URL.createObjectURL(blob)
-  window.open(url, "_blank")
-  setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  return URL.createObjectURL(blob)
 }

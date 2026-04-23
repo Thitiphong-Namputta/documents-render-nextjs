@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react"
 
 import { generatePdf } from "@/lib/api"
+import PdfViewerWrapper from "@/components/pdf/viewer-wrapper"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -213,6 +214,13 @@ function PersonFields({
 export default function PowerOfAttorneyMultiForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl)
+    }
+  }, [pdfUrl])
 
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
@@ -245,7 +253,8 @@ export default function PowerOfAttorneyMultiForm() {
     setError(null)
     try {
       const { day, month, year } = toThaiDateParts(values.date)
-      await generatePdf("power-of-attorney-multi", { ...values, day, month, year })
+      const url = await generatePdf("power-of-attorney-multi", { ...values, day, month, year })
+      setPdfUrl(url)
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -254,6 +263,7 @@ export default function PowerOfAttorneyMultiForm() {
   }
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
@@ -435,5 +445,15 @@ export default function PowerOfAttorneyMultiForm() {
 
       </form>
     </Form>
+
+    {pdfUrl && (
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+          ผลลัพธ์ PDF
+        </h2>
+        <PdfViewerWrapper url={pdfUrl} />
+      </div>
+    )}
+    </>
   )
 }

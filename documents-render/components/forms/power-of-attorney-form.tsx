@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon } from "lucide-react"
 
 import { generatePdf } from "@/lib/api"
+import PdfViewerWrapper from "@/components/pdf/viewer-wrapper"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -41,7 +42,9 @@ const schema = z.object({
   witness2: z.string().min(1, "กรุณากรอกชื่อพยานคนที่ 2"),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
+type FormOutput = z.infer<typeof schema>
+
 
 function PersonFields({
   prefix,
@@ -196,8 +199,15 @@ function PersonFields({
 export default function PowerOfAttorneyForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
 
-  const form = useForm<FormValues>({
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl)
+    }
+  }, [pdfUrl])
+
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
     defaultValues: {
       writtenAt: "",
@@ -211,12 +221,13 @@ export default function PowerOfAttorneyForm() {
     },
   })
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormOutput) {
     setLoading(true)
     setError(null)
     try {
       const { day, month, year } = toThaiDateParts(values.date)
-      await generatePdf("power-of-attorney", { ...values, day, month, year })
+      const url = await generatePdf("power-of-attorney", { ...values, day, month, year })
+      setPdfUrl(url)
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -225,6 +236,7 @@ export default function PowerOfAttorneyForm() {
   }
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* ข้อมูลเอกสาร */}
@@ -321,5 +333,15 @@ export default function PowerOfAttorneyForm() {
         </Button>
       </form>
     </Form>
+
+    {pdfUrl && (
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+          ผลลัพธ์ PDF
+        </h2>
+        <PdfViewerWrapper url={pdfUrl} />
+      </div>
+    )}
+    </>
   )
 }
