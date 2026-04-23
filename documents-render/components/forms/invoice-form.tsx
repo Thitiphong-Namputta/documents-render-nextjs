@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useState, useMemo } from "react"
+import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react"
@@ -46,8 +46,6 @@ function calcTotals(items: { qty: number; price: number }[], taxRate: number) {
 export default function InvoiceForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [totals, setTotals] = useState({ subtotal: 0, taxAmount: 0, total: 0 })
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,12 +66,10 @@ export default function InvoiceForm() {
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" })
 
-  const watchedItems = form.watch("items")
-  const watchedTax = form.watch("tax")
+  const watchedItems = useWatch({ control: form.control, name: "items" })
+  const watchedTax = useWatch({ control: form.control, name: "tax" })
 
-  useEffect(() => {
-    setTotals(calcTotals(watchedItems, watchedTax))
-  }, [watchedItems, watchedTax])
+  const totals = useMemo(() => calcTotals(watchedItems ?? [], watchedTax ?? 0), [watchedItems, watchedTax])
 
   async function onSubmit(values: FormValues) {
     setLoading(true)

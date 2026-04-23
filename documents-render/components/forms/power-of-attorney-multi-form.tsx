@@ -277,7 +277,7 @@ export default function PowerOfAttorneyMultiForm() {
                 <FormItem>
                   <FormLabel>วันที่ทำเอกสาร</FormLabel>
                   <FormControl>
-                    <ThaiDatePicker value={field.value} onChange={field.onChange} />
+                    <ThaiDatePicker value={field.value} onChange={field.onChange} numerals="latn" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
