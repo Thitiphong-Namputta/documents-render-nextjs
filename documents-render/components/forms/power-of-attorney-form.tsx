@@ -15,7 +15,7 @@ import { ThaiDatePicker, toThaiDateParts } from "@/components/ui/thai-date-picke
 
 const personSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อ"),
-  age: z.number().int().positive("อายุต้องมากกว่า 0"),
+  age: z.coerce.number().int().positive("อายุต้องมากกว่า 0"),
   ethnicity: z.string().min(1, "กรุณากรอกเชื้อชาติ"),
   nationality: z.string().min(1, "กรุณากรอกสัญชาติ"),
   houseNo: z.string().min(1, "กรุณากรอกบ้านเลขที่"),
@@ -71,7 +71,7 @@ function PersonFields({
           render={({ field }) => (
             <FormItem>
               <FormLabel>อายุ (ปี)</FormLabel>
-              <FormControl><Input type="number" min={1} {...field} /></FormControl>
+              <FormControl><Input type="number" min={1} {...field} value={field.value ?? ""} /></FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -202,8 +202,8 @@ export default function PowerOfAttorneyForm() {
     defaultValues: {
       writtenAt: "",
       date: undefined as unknown as Date,
-      grantor: { name: "", age: undefined as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "", currentAddress: "" },
-      attorney: { name: "", age: undefined as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "" },
+      grantor: { name: "", age: "" as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "", currentAddress: "" },
+      attorney: { name: "", age: "" as unknown as number, ethnicity: "ไทย", nationality: "ไทย", houseNo: "", moo: "", soi: "", road: "", subDistrict: "", district: "", province: "", phone: "" },
       powers1: "",
       powers2: "",
       witness1: "",

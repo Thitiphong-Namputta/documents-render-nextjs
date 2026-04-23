@@ -236,7 +236,7 @@ export default function InvoiceForm() {
                   name={`items.${index}.qty`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl><Input type="number" min={1} className="text-right" {...field} /></FormControl>
+                      <FormControl><Input type="number" min={1} className="text-right" {...field} value={field.value ?? ""} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -245,7 +245,7 @@ export default function InvoiceForm() {
                   name={`items.${index}.price`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl><Input type="number" min={0} className="text-right" {...field} /></FormControl>
+                      <FormControl><Input type="number" min={0} className="text-right" {...field} value={field.value ?? ""} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -289,7 +289,7 @@ export default function InvoiceForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input type="number" min={0} max={100} className="h-6 w-16 text-right text-sm" {...field} />
+                        <Input type="number" min={0} max={100} className="h-6 w-16 text-right text-sm" {...field} value={field.value ?? ""} />
                       </FormControl>
                     </FormItem>
                   )}
