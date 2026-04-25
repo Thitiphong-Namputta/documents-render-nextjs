@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { ThaiDatePicker, toThaiDateParts } from "@/components/ui/thai-date-picker"
+import { ThaiAddressFields } from "@/components/ui/thai-address-fields"
 
 const personSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อ"),
@@ -165,36 +166,7 @@ function PersonFields({
           </FormItem>
         )}
       />
-      <FormField
-        name={`${prefix}.subDistrict`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>ตำบล/แขวง</FormLabel>
-            <FormControl><Input {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        name={`${prefix}.district`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>อำเภอ/เขต</FormLabel>
-            <FormControl><Input {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        name={`${prefix}.province`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>จังหวัด</FormLabel>
-            <FormControl><Input {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <ThaiAddressFields prefix={prefix} />
       {showCurrentAddress && (
         <FormField
           name={`${prefix}.currentAddress`}
