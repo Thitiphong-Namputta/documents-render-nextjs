@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon } from "lucide-react"
 
-import { generatePdf } from "@/lib/api"
+import { generatePdf, getSignaturePositions, type SignaturePositionsResult } from "@/lib/api"
 import PdfViewerWrapper from "@/components/pdf/viewer-wrapper"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -200,6 +200,7 @@ export default function PowerOfAttorneyForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [sigPositions, setSigPositions] = useState<SignaturePositionsResult | null>(null)
 
   useEffect(() => {
     return () => {
@@ -226,8 +227,13 @@ export default function PowerOfAttorneyForm() {
     setError(null)
     try {
       const { day, month, year } = toThaiDateParts(values.date)
-      const url = await generatePdf("power-of-attorney", { ...values, day, month, year })
+      const payload = { ...values, day, month, year }
+      const [url, sigResult] = await Promise.all([
+        generatePdf("power-of-attorney", payload),
+        getSignaturePositions("power-of-attorney", payload),
+      ])
       setPdfUrl(url)
+      setSigPositions(sigResult)
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -339,7 +345,7 @@ export default function PowerOfAttorneyForm() {
         <h2 className="mb-4 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
           ผลลัพธ์ PDF
         </h2>
-        <PdfViewerWrapper url={pdfUrl} />
+        <PdfViewerWrapper url={pdfUrl} sigPositions={sigPositions} />
       </div>
     )}
     </>

@@ -1,0 +1,17 @@
+.sigOverlay {
+  position: absolute;
+  left: var(--sig-x);
+  top: var(--sig-y);
+  width: var(--sig-w);
+  height: var(--sig-h);
+  border: 2px dashed #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+  pointer-events: none;
+}
+
+.sigLabel {
+  display: block;
+  padding: 2px 4px;
+  font-size: 10px;
+  color: #3b82f6;
+}

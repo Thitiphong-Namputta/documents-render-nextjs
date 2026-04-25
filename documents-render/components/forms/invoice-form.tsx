@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react"
 
-import { generatePdf } from "@/lib/api"
+import { generatePdf, getSignaturePositions, type SignaturePositionsResult } from "@/lib/api"
 import PdfViewerWrapper from "@/components/pdf/viewer-wrapper"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -48,6 +48,7 @@ export default function InvoiceForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [sigPositions, setSigPositions] = useState<SignaturePositionsResult | null>(null)
 
   useEffect(() => {
     return () => {
@@ -84,15 +85,20 @@ export default function InvoiceForm() {
     setError(null)
     const { subtotal, taxAmount, total } = calcTotals(values.items, values.tax)
     try {
-      const url = await generatePdf("invoice", {
+      const payload = {
         ...values,
         invoiceDate: formatThaiDate(values.invoiceDate),
         dueDate: formatThaiDate(values.dueDate),
         subtotal,
         taxAmount,
         total,
-      })
+      }
+      const [url, sigResult] = await Promise.all([
+        generatePdf("invoice", payload),
+        getSignaturePositions("invoice", payload),
+      ])
       setPdfUrl(url)
+      setSigPositions(sigResult)
     } catch (e) {
       setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด")
     } finally {
@@ -349,7 +355,7 @@ export default function InvoiceForm() {
         <h2 className="mb-4 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
           ผลลัพธ์ PDF
         </h2>
-        <PdfViewerWrapper url={pdfUrl} />
+        <PdfViewerWrapper url={pdfUrl} sigPositions={sigPositions} />
       </div>
     )}
   </>
